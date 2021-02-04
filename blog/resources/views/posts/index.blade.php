@@ -38,6 +38,9 @@
                     </tbody>
                 </table>
             </div>
+            <div class="text-center">
+                {!! $posts->links() !!}
+            </div>
         </div>
     </div>
 @endsection
