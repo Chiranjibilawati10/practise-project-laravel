@@ -21,7 +21,7 @@
                 <div class="post">
                     <h3>{{$post->title}}</h3>
                     <p>{{substr($post->body,0,30)}}</p>
-                    <a href="#">Read more</a>
+                    <a href="{{url('blog/'.$post->slug) }}">Read more</a>
                 </div>
             @endforeach
         </div>

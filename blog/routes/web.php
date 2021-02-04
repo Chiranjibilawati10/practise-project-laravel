@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::group(['middleware' => ['web']], function () {
+    Route::get('blog/{slug}', ['as'=>'blog.single','uses'=>'BlogController@getSingle'])->where('slug','[\w\d\-\_]+');
     Route::get('contact','PagesController@getContact');
     Route::get('about', 'PagesController@getAbout');
     Route::get('/', 'PagesController@getIndex');
