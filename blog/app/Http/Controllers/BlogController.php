@@ -13,4 +13,11 @@ class BlogController extends Controller
 
         return view('blog.single')->withPost($post);
     }
+
+    public function getIndex()
+    {
+        $posts = Post::paginate(10);
+
+        return view('blog.index')->withPosts($posts);
+    }
 }
