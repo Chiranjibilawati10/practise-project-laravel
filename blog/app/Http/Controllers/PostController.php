@@ -9,6 +9,8 @@ use App\Category;
 use App\Tag;
 use App\User;
 use Purifier;
+use Image;
+use Storage;
 
 class PostController extends Controller
 {
@@ -23,7 +25,7 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts = Post::orderBy('id', 'asc')->paginate(4);
+        $posts = Post::orderBy('id', 'asc')->paginate(10);
 
         return view('posts.index')->withPosts($posts);
     }
@@ -55,6 +57,7 @@ class PostController extends Controller
             'slug' => 'required|alpha_dash|min:5|max:255',
             'category_id' =>'required|integer',
             'body'=> 'required',
+            'featured_image'=> 'sometimes|image',
         ]);
         //storing into the database
         $post = new Post;
@@ -62,6 +65,16 @@ class PostController extends Controller
         $post->slug = $request->slug;
         $post->category_id = $request->category_id;
         $post->body = Purifier::clean($request->body);
+        //image upload
+
+        if ($request->hasFile('featured_image')){
+            $image = $request->file('featured_image');
+            $fileName = time().'.'.$image->getClientOriginalExtension();
+            $location = public_path('images/'.$fileName);
+            Image::make($image)->resize(800, 400)->save($location);
+
+            $post->image = $fileName;
+        }
 
         $post->save();
         $post->tags()->sync($request->tags, false);
@@ -113,22 +126,23 @@ class PostController extends Controller
     public function update(Request $request, $id)
     {
         $post = Post::find($id);
-        if ($request->input('slug') == $post->slug)
-        {
-            $this->validate($request, [
-                'title' => 'required|max:255',
-                'category_id' =>'required|integer',
-                'body'=> 'required'
-            ]);
-        } else {
+        // if ($request->input('slug') == $post->slug)
+        // {
+        //     $this->validate($request, [
+        //         'title' => 'required|max:255',
+        //         'category_id' =>'required|integer',
+        //         'body'=> 'required'
+        //     ]);
+        // } else {
             //validate the data
             $this->validate($request, [
                 'title' => 'required|max:255',
-                'slug' => 'required|alpha_dash|min:5|max:255|unique:posts,slug',
+                'slug' => "required|alpha_dash|min:5|max:255|unique:posts,slug,$id",
                 'category_id' =>'required|integer',
-                'body'=> 'required'
+                'body'=> 'required',
+                'featured_image'=>'image'
             ]);
-          }
+        //   }
 
         $post = Post::find($id);
 
@@ -136,6 +150,20 @@ class PostController extends Controller
         $post->slug = $request->input('slug');
         $post->category_id = $request->input('category_id');
         $post->body = Purifier::clean($request->input('body'));
+
+        if ($request->hasFile('featured_image')){
+            //add new photo
+            $image = $request->file('featured_image');
+            $fileName = time().'.'.$image->getClientOriginalExtension();
+            $location = public_path('images/'.$fileName);
+            Image::make($image)->resize(800, 400)->save($location);
+
+            $oldFileName = $post->image;
+            //update the datbase
+            $post->image = $fileName;
+            //delete the old photo
+            Storage::delete(($oldFileName));
+        }
 
         $post->save();
 
@@ -156,6 +184,10 @@ class PostController extends Controller
     {
         $post = Post::find($id);
         $post->tags()->detach();
+
+        Storage::delete($post->image);
+
+        $post->delete();
         
         Session::flash('success', 'This post deleted successfully.');
 
