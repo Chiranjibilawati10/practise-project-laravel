@@ -8,6 +8,8 @@ use App\Post;
 use Session;
 use App\User;
 use Auth;
+use Redirect;
+
 
 class CommentController extends Controller
 {
@@ -40,11 +42,8 @@ class CommentController extends Controller
     public function store(Request $request)
     {
         $comment = new Comment();
-
         $comment->comment = $request->comment;
-        
         $comment->user()->associate($request->user());
-
         $post = Post::find($request->post_id);
         $post->comments()->save($comment);
 
@@ -56,13 +55,9 @@ class CommentController extends Controller
         $reply = new Comment();
 
         $reply->comment = $request->get('comment');
-
         $reply->user()->associate($request->user());
-
         $reply->parent_id = $request->get('comment_id');
-
         $post = Post::find($request->get('post_id'));
-
         $post->comments()->save($reply);
 
         return back();
@@ -70,10 +65,10 @@ class CommentController extends Controller
     }
     public function edit($id)
     {
-        // dd($id);
-        $editableComment = Comment::where('id',$id)->get();
-                // dd($editableComment);
-        return view('posts.edit-comment')->withComments($editableComment);
+        
+        $updateComment = Comment::where('id',$id)->get();
+
+        return view('posts.edit-comment')->withupdateComment($updateComment);
     }
     /**
      * Display the specified resource.
@@ -94,21 +89,14 @@ class CommentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $comment_id)
+    public function update(Request $request, Comment $comment)
     {
-        dd($request);
-        $comment = new Comment();
 
         $comment->comment = $request->comment;
-        
-        $comment->user()->associate($request->user());
-        $comment->parent_id = $request->comment_id;
-        $comment->commentable_id = $request->commentable_id;
-        // $post = Post::find($request->post_id);
-        // $post->comments()->save($comment);
+      
         $comment->save();
-
-        return back();
+        
+    return redirect()->route('posts.show',$comment->commentable_id);
     }
 
     /**
@@ -117,8 +105,13 @@ class CommentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($comment_id)
     {
-        //
+        $comment = Comment::find($comment_id);
+        $comment->delete();
+        
+        Session::flash('success', 'This comment deleted successfully.');
+
+        return Redirect::back();
     }
 }
