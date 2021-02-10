@@ -20,7 +20,7 @@
             @foreach($posts as $post)
                 <div class="post">
                     <h3>{{$post->title}}</h3>
-                    <p>{{substr($post->body,0,30)}}</p>
+                    <p>{{substr(strip_tags($post->body),0,30) }}</p>
                     <a href="{{url('blog/'.$post->slug) }}">Read more</a>
                 </div>
             @endforeach
