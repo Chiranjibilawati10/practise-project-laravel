@@ -11,6 +11,7 @@ use App\User;
 use Purifier;
 use Image;
 use Storage;
+use Comment;
 
 class PostController extends Controller
 {
