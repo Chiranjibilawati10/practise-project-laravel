@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Post;
+use App\Comment;
 use Session;
 use App\Category;
 use App\Tag;
@@ -11,7 +12,6 @@ use App\User;
 use Purifier;
 use Image;
 use Storage;
-use Comment;
 
 class PostController extends Controller
 {
@@ -94,7 +94,9 @@ class PostController extends Controller
     public function show($id)
     {
         $post = Post::find($id);
-        return view('posts.show')->withPost($post);
+        $comment = Comment::find($id);
+
+        return view('posts.show')->withPost($post)->withComment($comment);
     }
 
     /**
@@ -127,15 +129,7 @@ class PostController extends Controller
     public function update(Request $request, $id)
     {
         $post = Post::find($id);
-        // if ($request->input('slug') == $post->slug)
-        // {
-        //     $this->validate($request, [
-        //         'title' => 'required|max:255',
-        //         'category_id' =>'required|integer',
-        //         'body'=> 'required'
-        //     ]);
-        // } else {
-            //validate the data
+      
             $this->validate($request, [
                 'title' => 'required|max:255',
                 'slug' => "required|alpha_dash|min:5|max:255|unique:posts,slug,$id",
@@ -143,7 +137,6 @@ class PostController extends Controller
                 'body'=> 'required',
                 'featured_image'=>'image'
             ]);
-        //   }
 
         $post = Post::find($id);
 

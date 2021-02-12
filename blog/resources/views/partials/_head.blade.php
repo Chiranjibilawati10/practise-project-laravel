@@ -10,4 +10,4 @@
    
     {{ Html::style('css/styles.css') }}
     
-    <title>Lawati Blog @yield('title') </title> 
+    <title> @yield('title') </title> 
