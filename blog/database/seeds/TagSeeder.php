@@ -6,7 +6,6 @@ use App\Tag;
 
 class TagSeeder extends Seeder
 {
-	private $tagData = [];
     /**
      * Run the database seeds.
      *
@@ -14,14 +13,13 @@ class TagSeeder extends Seeder
      */
     public function run()
     {
-         for ($i=0; $i <5; $i++){
-        	$tagData[] = [
-        		'name'=>'Tag 1',
-        	];
-        }
+       //custom tag name
+       $tags = ['popular','latest','weekly'];
 
-        foreach ($tagData as $tags) {
-        	Tag::create($tags);
-        }
+       foreach($tags as $tag){
+           factory(App\Tag::class)->create([
+               'name' => $tag
+           ]);
+       }
     }
 }

@@ -3,11 +3,10 @@
 use Illuminate\Database\Seeder;
 
 use App\Post;
-use App\Category;
+use App\Tag;
 
 class PostSeeder extends Seeder
 {
-    private $postData = [];
     /**
      * Run the database seeds.
      *
@@ -15,20 +14,14 @@ class PostSeeder extends Seeder
      */
     public function run()
     {
-        $category_id = Category::first()->value('id');
+        factory(App\Post::class,10)->create();
+        
+        $tags = App\Tag::all();
 
-         for ($i=0; $i <100; $i++){
-            $postData[] = [
-            'title' => 'Title 1',
-            'body' => Str::random(10),
-            'slug' => Str::random(10),
-            'category_id' => $category_id,
-            ];
-        }
-
-        foreach ($postData as $posts) {
-            Post::create($posts);
-        }
-       
+            App\Post::all()->each(function ($post) use ($tags) { 
+                $post->tags()->attach(
+                    $tags->random(1,3)->pluck('id')->toArray()
+                ); 
+            });
     }
 }
